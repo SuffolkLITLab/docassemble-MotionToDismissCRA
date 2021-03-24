@@ -42,19 +42,19 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
                 out.setdefault(package, []).append(prefix+name)
     return out
 
-setup(name='docassemble.TaltosMotionToDismissCRA',
+setup(name='docassemble.MotionToDismissCRA',
       version='0.0.1',
       description=('A docassemble extension.'),
-      long_description='# docassemble.TaltosMotionToDismissCRA\n\nA docassemble extension.\n\n## Author\n\nNicholas Taltos, taltos@law.cardozo.yu.edu\n\n',
+      long_description='# docassemble.MotionToDismissCRA\n\nA docassemble extension.\n\n## Author\n\nCaroline Robinson, crobinson@mlri.org\n\n',
       long_description_content_type='text/markdown',
-      author='Nicholas Taltos',
-      author_email='taltos@law.cardozo.yu.edu',
+      author='Caroline Robinson',
+      author_email='crobinson@mlri.org',
       license='The MIT License (MIT)',
       url='https://docassemble.org',
       packages=find_packages(),
       namespace_packages=['docassemble'],
       install_requires=[],
       zip_safe=False,
-      package_data=find_package_data(where='docassemble/TaltosMotionToDismissCRA/', package='docassemble.TaltosMotionToDismissCRA'),
+      package_data=find_package_data(where='docassemble/MotionToDismissCRA/', package='docassemble.MotionToDismissCRA'),
      )
 

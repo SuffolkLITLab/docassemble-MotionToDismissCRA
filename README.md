@@ -1,8 +1,8 @@
-# docassemble.TaltosMotionToDismissCRA
+# docassemble.MotionToDismissCRA
 
 A docassemble extension.
 
 ## Author
 
-Nicholas Taltos, taltos@law.cardozo.yu.edu
+Caroline Robinson, crobinson@mlri.org
 

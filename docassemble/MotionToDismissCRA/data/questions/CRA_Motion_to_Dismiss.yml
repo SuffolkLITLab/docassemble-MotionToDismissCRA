@@ -1,0 +1,374 @@
+mandatory: True
+code: |
+  interview_metadata # make sure we initialize the object
+  if not defined("interview_metadata['CRA_Motion_to_Dismiss']"):
+    interview_metadata.initializeObject('CRA_Motion_to_Dismiss')
+  interview_metadata['CRA_Motion_to_Dismiss'].update({
+    
+    'title': 'Motion to Dismiss Application for Child Requiring Assistance (CRA)',
+    'short title': 'CRA Motion to Dismiss',
+    'description': 'This form asks the court to dismiss an Application for Child Requiring Assistance. For more information on the CRA process please click here.',
+    'original_form': 'https://www.mass.gov/doc/cra-motion-to-dismiss-jv-091/download',
+    'allowed courts': [
+      'Juvenile Court',
+    ],
+    'preferred court': 'Juvenile Court',
+    'categories': [
+      'Family Law',
+      'Guardianship',
+    ],
+    'logic block variable': 'CRA_Motion_to_Dismiss',
+    'attachment block variable': 'CRA_Motion_to_Dismiss_attachment',
+    'typical role': 'unknown',
+    'built_in_fields_used': [
+      {'variable': 'court_county',
+       'transformed_variable': 'courts[0].address.county',
+      },
+      {'variable': 'docket_number',
+       'transformed_variable': 'docket_numbers[0]',
+      },
+      {'variable': 'user_signature',
+       'transformed_variable': 'users[0].signature',
+      },
+      {'variable': 'signature_date',
+       'transformed_variable': 'signature_date',
+      },
+      {'variable': 'user_name',
+       'transformed_variable': 'str(users[0])',
+      },
+      ],
+    'fields': [
+      {'variable': '',
+       'transformed_variable': '',
+      'field_type': 'yesno',
+      },
+      {'variable': 'case_name',
+       'transformed_variable': 'case_name',
+      'field_type': 'text',
+      'field_data_type': 'text',
+      },
+      {'variable': 'application_date',
+       'transformed_variable': 'application_date',
+      'field_type': 'text',
+      'field_data_type': 'date',
+      },
+      {'variable': 'is_applicant',
+       'transformed_variable': 'is_applicant',
+      'field_type': 'yesno',
+      },
+      {'variable': 'is_child',
+       'transformed_variable': 'is_child',
+      'field_type': 'yesno',
+      },
+      {'variable': 'is_legal_guardian',
+       'transformed_variable': 'is_legal_guardian',
+      'field_type': 'yesno',
+      },
+      {'variable': 'factfinding_hearing_has_occurred',
+       'transformed_variable': 'factfinding_hearing_has_occurred',
+      'field_type': 'yesno',
+      },
+      {'variable': 'has_not_occurred',
+       'transformed_variable': 'has_not_occurred',
+      'field_type': 'yesno',
+      },
+      {'variable': 'reasons_for_request',
+       'transformed_variable': 'reasons_for_request',
+      'field_type': 'text',
+      'field_data_type': 'text',
+      },
+      {'variable': 'user_title',
+       'transformed_variable': 'users[0].title',
+      'field_type': 'text',
+      'field_data_type': 'text',
+      },
+      {'variable': 'service_date',
+       'transformed_variable': 'service_date',
+      'field_type': 'text',
+      'field_data_type': 'date',
+      },
+      {'variable': '',
+       'transformed_variable': '',
+      'field_type': 'yesno',
+      },
+      ],
+  })
+---
+default screen parts:
+  under: |
+    % if not user_logged_in():
+    [:sign-in-alt: Sign-in](${url_of('login', next=interview_url())}) or [register](${url_of('register', next=interview_url())}) to save your progress (optional).
+    % endif
+    % if get_config('debug'):
+    Feedback, suggestions, or comments? [Complete this survey](${ interview_url(i="docassemble.MotionToDismissCRA:feedback.yml", github_repo=github_repo_name, github_user='suffolklitlab', variable=user_info().variable, question_id=user_info().question_id, package_version=package_version_number, local=False,reset=1) } ){:target="_blank"}.
+    % else:
+    Feedback, suggestions, or comments? [Complete this survey](${ interview_url(i="docassemble.MotionToDismissCRA:feedback.yml", github_repo=github_repo_name, github_user='suffolklitlab', variable=user_info().variable, question_id=user_info().question_id, package_version=package_version_number, local=False,reset=1) } ){:target="_blank"}.
+    % endif    
+---
+id: Fact-Finding Hearing
+question: |
+  Has the fact-finding hearing occurred?
+subquestion: |
+  A **fact-finding hearing** occurs after the preliminary hearing and after any period of informal assistance.  
+fields:
+  no label: factfinding
+  datatype: radio
+  choices: 
+    - Yes: factfindingyes
+    - No: factfindingno
+
+---
+code: |
+ factfinding_hearing_has_occurred = factfinding == "factfindingyes"
+ has_not_occurred = factfinding == "factfindingno"
+---
+id: Service Certification
+question: |
+  I certify that I have served this motion to all counsel of record by first-class mail, postage prepaid.
+fields:
+  - 'I certify': service
+    datatype: yesno
+---
+id: Service Date
+question: |
+  I certify that the motion was served on :
+fields:
+  - 'Service date': service_date
+    datatype: date
+---
+id: Case Name
+question: |
+   Write the name of the child for whom the original CRA was filed:
+fields:
+  - 'Name of Child': case_name
+---
+id: Relationship to CRA
+question: |
+  Who is asking the Court to dismiss the CRA?
+subquestion: |
+  I am the:
+fields:
+  - 'Applicant': is_applicant
+    datatype: yesno
+  - 'Child': is_child
+    datatype: yesno
+  - 'Parent, Legal Guardian, or Custodian': is_legal_guardian
+    datatype: yesno
+#---
+#code: |
+ #is_applicant = relationship == "applicant"
+ #is_child = relationship == "child"
+ #is_legal_guardian = relationship == "legal guardian" 
+---
+id: CRA Application Date
+question: |
+  When was the Application for Child Requiring Assistance filed?
+fields:
+  - 'Application date': application_date
+    datatype: date
+---
+id: CRA Filer
+question: |
+  Who filed the CRA?
+subquestion: |
+ An Application for a Child Requiring Assistance may be filed by either:  
+   <ul>
+   <li>a **parent, legal guardian, or custodian** with custody of the child</li>  
+     
+   or  
+   
+   <li>a **representative or employee of the school district** where the child attends.</li></ul>  
+     
+   Who filed the CRA?
+fields:
+  - Filer: filer
+    choices:
+      - Parent, Legal Guardian, Custodian
+      - School Employee
+---
+id: Title and District
+question: |
+  Title and School District
+subquestion: |
+  Please include the filer's title and school district.
+fields:
+  - 'Title': users[0].title
+---      
+id: Reason for CRA filed by parent, guardian, or custodian
+question: |
+  Why was the CRA filed?
+subquestion: |
+  In the original CRA, the filer either claimed the child was a **Runaway** or was **Stubborn**. The definitions for each are below.  
+  <ul>  
+  <li>**Runaway**: a child who repeatedly runs away from the home of the parent, legal guardian, or custodian.</li>  
+    
+  <li>**Stubborn**: a child who fails to obey the lawful and reasonable commands of the parent, legal guardian, or custodian which hurts his or her ability to care for the child.</li>  
+  </ul>  
+  Which did the filer claim in the CRA?
+
+field: parentreason
+buttons:
+    - Runaway: runaway
+    - Stubborn: stubborn
+---
+id: Reason for CRA filed by school employee
+question: |
+  Why was the CRA filed?
+subquestion: |
+  In the original CRA, the filer either claimed the child was a **Habitual Truant** or a **Habitual School Offender**. The definitions for each are below.  
+    <ul>
+    <li>**Habitual Truant**: a child who fails to attend school for more than 8 days in a quarterwithout a proper excuse.</li>  
+      
+    <li>**Habitual School Offender**: a child who fails to obey the lawful and reasonable commands of the school.</li>  
+    </ul>
+  Which did the filer claim in the CRA?
+
+field: schoolreason
+buttons:
+    - Habitual Truant: habitualtruant
+    - Habitual School Offender: habitualschooloffender
+---
+progress: 100
+mandatory: True
+question: |
+  Placeholder download screen
+subquestion: |
+  Placeholder
+  
+  ### Next steps
+  
+  1. Step 1
+  1. Step 2
+  
+  Below is a preview of your form.
+  
+  ${CRA_Motion_to_Dismiss_attachment }
+attachment code: CRA_Motion_to_Dismiss_attachment
+---
+need: CRA_Motion_to_Dismiss
+attachment:
+    variable name: CRA_Motion_to_Dismiss_attachment
+    name: CRA Motion to Dismiss
+    filename: CRA_Motion_to_Dismiss
+    pdf template file: CRA_Motion_to_Dismiss.pdf
+    fields: 
+      - "court_county": ${ courts[0].address.county }
+      - "docket_number": ${ docket_numbers[0] }
+      - "user_signature": ${ users[0].signature }
+      - "signature_date": ${ signature_date }
+      - "user_name": ${ str(users[0]) }
+      - "case_name": ${ case_name }
+      - "application_date": ${ application_date }
+      - "is_applicant": ${ is_applicant }
+      - "is_child": ${ is_child }
+      - "is_legal_guardian": ${ is_legal_guardian }
+      - "factfinding_hearing_has_occurred": ${ factfinding_hearing_has_occurred }
+      - "has_not_occurred": ${ has_not_occurred }
+      - "reasons_for_request": ${ reasons_for_request }
+      - "user_title": ${ users[0].title }
+      - "service_date": ${ service_date }
+      - "user_signature_2": ${ users[0].signature if service else "" }
+---
+include:
+  - docassemble.MAVirtualCourt:basic-questions.yml
+---
+comment: |
+  This question is used to introduce your interview. Please customize
+continue button field: CRA_Motion_to_Dismiss_intro
+id: Intro Explanation
+question: |
+  Motion to Dismiss Application for Child Requiring Assistance (CRA)
+subquestion: |
+  This form asks the court to dismiss an Application for Child Requiring Assistance. For more information on the CRA process please [click here](https://www.mass.gov/child-requiring-assistance-cases).
+---
+id: Reason for Motion to Dismiss CRA
+question: |
+  Reason for Dismissal Request
+subquestion: |
+  Why should the court dismiss the application for assistance?  
+    
+    First, state why the CRA was filed.  
+  Second, state how the issues have been resolved.  
+    
+    
+  Some of the **common reasons to dismiss** are: the issue that brought the petition before the court has been resolved; a parent no longer wants the case to be in court; or, the family has not been provided services to their satisfaction.  
+    
+    
+  For more information about the CRA process, [click here](https://www.mass.gov/doc/handbook-for-parents-legal-guardians-and-custodians-in-child-requiring-assistance-cases-0/download). 
+fields:
+  - 'State why the CRA was filed.': users[0].request1
+    input type: area
+    rows: 8
+  - 'State how the issues have been resolved.': users[0].request2
+    input type: area
+    rows: 8
+---
+sets: reasons_for_request
+scan for variables: False
+code: |
+  # set_users_request = True must be the very last line of this code block. 
+  reasons_for_request = users[0].request1 + users[0].request2
+---
+id: interview_order_CRA_Motion_to_Dismiss
+code: |
+  # This is a placeholder to control logic flow in this interview
+  # It was generated from interview_generator.py as an 'interview order' type question.
+  basic_questions_intro_screen 
+  CRA_Motion_to_Dismiss_intro
+  # Set the preferred/allowed courts for this interview
+  preferred_court = interview_metadata["CRA_Motion_to_Dismiss"]["preferred court"]
+  allowed_courts = interview_metadata["CRA_Motion_to_Dismiss"]["allowed courts"]
+  case_name
+  is_applicant
+  application_date
+  factfinding_hearing_has_occurred
+  if filer == "Parent, Legal Guardian, Custodian":
+    parentreason
+  if filer == "School Employee":
+    users[0].title
+    schoolreason
+  reasons_for_request
+  if service:
+    service_date
+  courts[0].address.county
+  docket_numbers[0]
+  basic_questions_signature_flow
+  users[0].signature
+  signature_date
+  str(users[0])
+  # By default, we'll mark any un-filled fields as DAEmpty(). This helps avoid errors if you intentionally hide a logic branch or mark a question not required
+  # Comment out the line below if you don't want this behavior. 
+  mark_unfilled_fields_empty(interview_metadata["CRA_Motion_to_Dismiss"])
+  CRA_Motion_to_Dismiss_preview_question # Pre-canned preview screen
+  CRA_Motion_to_Dismiss = True
+---
+id: Form Preview
+continue button field: CRA_Motion_to_Dismiss_preview_question
+question: |
+  Preview of Completed Motion to Dismiss CRA
+subquestion: |
+  Here is a preview of the form to sign on the next page. 
+  
+   ${CRA_Motion_to_Dismiss_attachment_preview}
+---
+attachment:
+    variable name: CRA_Motion_to_Dismiss_attachment_preview
+    name: CRA Motion to Dismiss
+    filename: CRA_Motion_to_Dismiss
+    pdf template file: CRA_Motion_to_Dismiss.pdf
+    fields: 
+      - "court_county": ${ courts[0].address.county }
+      - "docket_number": ${ docket_numbers[0] }
+      - "signature_date": ${ signature_date }
+      - "user_name": ${ str(users[0]) }
+      - "case_name": ${ case_name }
+      - "application_date": ${ application_date }
+      - "is_applicant": ${ is_applicant }
+      - "is_child": ${ is_child }
+      - "is_legal_guardian": ${ is_legal_guardian }
+      - "factfinding_hearing_has_occurred": ${ factfinding_hearing_has_occurred }
+      - "has_not_occurred": ${ has_not_occurred }
+      - "reasons_for_request": ${ reasons_for_request }
+      - "user_title": ${ users[0].title }
+      - "service_date": ${ service_date }
+      - "user_signature_2": ${ users[0].signature if service else ""}
