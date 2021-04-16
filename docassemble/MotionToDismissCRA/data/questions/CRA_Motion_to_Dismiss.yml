@@ -38,9 +38,22 @@ code: |
 code: |
   form_approved_for_email_filing = False  
 ---
+code: |
+  al_form_type = 'existing_case'
+---
 objects:
   - cra_child: ALIndividual
+  - users: ALPeopleList.using(ask_number=True, target_number=1)
 ---
+mandatory: True
+code: |
+  interview_order_CRA_Motion_to_Dismiss
+  CRA_Motion_to_Dismiss_preview_question
+  basic_questions_signature_flow
+  users[0].signature
+  signature_date
+  CRA_Motion_to_Dismiss_download
+---  
 id: interview_order_CRA_Motion_to_Dismiss
 code: |
   # This is a placeholder to control logic flow in this interview
@@ -53,6 +66,9 @@ code: |
   case_name
   if not(is_applicant or is_legal_guardian or is_child):
     exit_must_be_interested_party
+  if is_child:
+    set_user_to_child
+  users.gather()    
   application_date
   factfinding_hearing_has_occurred
   if filer == "Parent, Legal Guardian, Custodian":
@@ -63,17 +79,15 @@ code: |
   reasons_for_request
   if service:
     service_date
-  courts[0].address.county
-  docket_numbers[0]
-  basic_questions_signature_flow
-  users[0].signature
-  signature_date
-  str(users[0])
-  # By default, we'll mark any un-filled fields as DAEmpty(). This helps avoid errors if you intentionally hide a logic branch or mark a question not required
-  # Comment out the line below if you don't want this behavior. 
-  CRA_Motion_to_Dismiss_preview_question # Pre-canned preview screen
-  CRA_Motion_to_Dismiss = True
-  
+  trial_court
+  docket_number
+  interview_order_CRA_Motion_to_Dismiss = True
+---
+depends on:
+  - is_child
+code: |
+  users[0] = cra_child.copy_shallow('users[0]')
+  set_user_to_child = True
 ---
 id: Fact-Finding Hearing
 question: |
@@ -167,7 +181,13 @@ subquestion: |
   </div>  
   
 fields:
-  - Has the fact finding hearing happened in ${ cra_child.familiar() }'s case?: factfinding
+  - label: |
+      % if is_child:
+      Has the fact finding hearing happened in your case yet?
+      % else:
+      Has the fact finding hearing happened in ${ cra_child.familiar() }'s case?
+      % endif
+    field: factfinding
     datatype: radio
     choices: 
       - Yes: factfindingyes
@@ -218,7 +238,11 @@ css: |
 ---
 id: CRA Filer
 question: |
+  % if is_child:
+  Who filed the CRA case against you?
+  % else:
   Who filed the CRA case against ${ cra_child.familiar() }?
+  % endif
 fields:
   - Filer: ask_filer
     datatype: radio
@@ -370,8 +394,9 @@ buttons:
     - Habitual Truant: habitualtruant
     - Habitual School Offender: habitualschooloffender
 ---
+id: download CRA Motion to Dismiss
 progress: 100
-mandatory: True
+event: CRA_Motion_to_Dismiss_download
 question: |
   Placeholder download screen
 subquestion: |
@@ -384,12 +409,26 @@ subquestion: |
   
   Below is a preview of your form.
   
-  ${CRA_Motion_to_Dismiss_attachment.as_pdf() }
+  ${al_user_bundle.download_list_html() }
+  
+  ${ al_user_bundle.send_button_html() }
 ---
 objects:
-  - CRA_Motion_to_Dismiss_attachment: ALDocument.using(filename="CRA_Motion_to_Dismiss", title="Motion to Dismiss CRA", has_addendum=False)
+  - CRA_Motion_to_Dismiss_attachment: ALDocument.using(filename="CRA_Motion_to_Dismiss", title="Motion to Dismiss CRA", enabled=True, has_addendum=True)  
 ---
-need: CRA_Motion_to_Dismiss
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[CRA_Motion_to_Dismiss_attachment], title="Forms to download and deliver to court", filename="motion_to_dismiss_CRA.pdf")
+  - al_court_bundle: ALDocumentBundle.using(elements=[CRA_Motion_to_Dismiss_attachment], title="Forms to download and deliver to court", filename="motion_to_dismiss_CRA.pdf")
+---
+generic object: ALDocument
+attachment:
+  variable name: x.addendum
+  docx template file: docx_addendum.docx
+---
+code: |
+  CRA_Motion_to_Dismiss_attachment.overflow_fields['reasons_for_request'].overflow_trigger = 480
+  CRA_Motion_to_Dismiss_attachment.overflow_fields.gathered = True
+---
 attachment:
     variable name: CRA_Motion_to_Dismiss_attachment[i]
     name: CRA Motion to Dismiss
@@ -397,8 +436,8 @@ attachment:
     skip undefined: True
     pdf template file: CRA_Motion_to_Dismiss.pdf
     fields: 
-      - "court_county": ${ courts[0].address.county }
-      - "docket_number": ${ docket_numbers[0] }
+      - "court_county": ${ trial_court.address.county }
+      - "docket_number": ${ docket_number }
       - "user_signature": ${ users[0].signature_if_final(i) }
       - "signature_date": ${ signature_date }
       - "user_name": ${ str(users[0]) }
@@ -456,8 +495,9 @@ fields:
     input type: area
     rows: 8
 ---
-sets: reasons_for_request
-scan for variables: False
+depends on:
+  - users[0].request1
+  - users[0].request2
 code: |
   # set_users_request = True must be the very last line of this code block. 
   reasons_for_request = users[0].request1 + users[0].request2
