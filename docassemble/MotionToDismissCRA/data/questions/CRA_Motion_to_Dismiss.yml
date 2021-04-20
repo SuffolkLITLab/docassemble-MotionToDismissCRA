@@ -41,9 +41,14 @@ code: |
 code: |
   al_form_type = 'existing_case'
 ---
+sections:
+  - review_cra_motion_to_dismiss: Review your answers
+---
 objects:
   - cra_child: ALIndividual
   - users: ALPeopleList.using(ask_number=True, target_number=1)
+  - other_parties: ALPeopleList.using(there_are_any=False)
+  - defendants: ALPeopleList.using(ask_number=True, target_number=1)
 ---
 mandatory: True
 code: |
@@ -63,7 +68,8 @@ code: |
   # Set the preferred/allowed courts for this interview
   preferred_court = interview_metadata["CRA_Motion_to_Dismiss"]["preferred court"]
   allowed_courts = interview_metadata["CRA_Motion_to_Dismiss"]["allowed courts"]
-  case_name
+  cra_child.name.first
+  nav.set_section('review_cra_motion_to_dismiss')
   if not(is_applicant or is_legal_guardian or is_child):
     exit_must_be_interested_party
   if is_child:
@@ -77,8 +83,6 @@ code: |
     users[0].title
     schoolreason
   reasons_for_request
-  if service:
-    service_date
   trial_court
   docket_number
   interview_order_CRA_Motion_to_Dismiss = True
@@ -88,6 +92,9 @@ depends on:
 code: |
   users[0] = cra_child.copy_shallow('users[0]')
   set_user_to_child = True
+---
+code: |
+  cra_child = defendants[0]
 ---
 id: Fact-Finding Hearing
 question: |
@@ -260,23 +267,9 @@ code: |
  factfinding_hearing_has_occurred = factfinding == "factfindingyes"
  has_not_occurred = factfinding == "factfindingno"
 ---
-id: Service Certification
-question: |
-  I certify that I have served this motion to all counsel of record by first-class mail, postage prepaid.
-fields:
-  - 'I certify': service
-    datatype: yesno
----
-id: Service Date
-question: |
-  I certify that the motion was served on :
-fields:
-  - 'Service date': service_date
-    datatype: date
----
 sets:
-  - cra_child.name.first
-  - cra_child.name.last
+  - defendants[0].name.first
+  - defendants[0].name.last
 id: Case Name
 question: |
   Who has the CRA case?
@@ -285,11 +278,11 @@ subquestion: |
   to get dismissed.
 fields:
   - code: |
-      cra_child.name_fields()
+      defendants[0].name_fields()
 ---
-code: |
-  case_name = cra_child.name.full()
----
+need:
+  - template_child_applicant_error_str
+  - template_child_guardian_error_str
 id: Relationship to CRA
 question: |
   Who are you?
@@ -312,6 +305,27 @@ fields:
     datatype: yesno
   - Parent or Legal Guardian of ${ cra_child.familiar() }: is_parent_guardian
     datatype: yesno    
+validation code: |
+  if (is_child and is_applicant):
+    validation_error(template_child_applicant_error_str, field="is_applicant")
+  if (is_child and is_legal_custodian) or (is_child and is_parent_guardian):
+    validation_error(template_child_guardian_error_str, field="is_child")
+---
+# The point of this and the next small template is to create a translation
+# entry in any XLSX translation file.
+template: template_child_applicant_error
+content: |
+  You cannot be both the child and the applicant. Are you sure that is what you mean?
+---  
+template: template_child_guardian_error
+content: |
+  You cannot be the child and the parent, guardian, or custodian. Are you sure that is what you mean?
+---
+code: |  
+  # We need to convert the templates to strings to make the validation_error
+  # work
+  template_child_applicant_error_str = str(template_child_applicant_error)
+  template_child_guardian_error_str = str(template_child_guardian_error)
 ---
 code: |
   is_legal_guardian = is_legal_custodian or is_parent_guardian
@@ -398,23 +412,83 @@ id: download CRA Motion to Dismiss
 progress: 100
 event: CRA_Motion_to_Dismiss_download
 question: |
-  Placeholder download screen
+  Your motion is ready to download
 subquestion: |
-  Placeholder
+  Thank you, ${ users }. Your form is ready to download and deliver to 
+  ${ trial_court }.
   
-  ### Next steps
+  1. Download and open the file below.
+  1. Click the "make changes" button if you have any corrections.
+  1. Call the ${ trial_court } at ${ bold(trial_court.phone) } to find out how
+     to deliver these forms. You can mail a copy to 
+     ${ trial_court.address.on_one_line() }.
   
-  1. Step 1
-  1. Step 2
-  
-  Below is a preview of your form.
+  ${ action_button_html(url_action('review_all_sections'), label='Make changes', color='info', icon='pencil-alt') }
   
   ${al_user_bundle.download_list_html() }
   
   ${ al_user_bundle.send_button_html() }
 ---
+id: review cra motion to dismiss
+event: review_cra_motion_to_dismiss
+question: |
+  Review your answers
+review:
+  - Edit: users[0].name.first
+    button: |
+      Your name: ${ users }
+  - Edit: cra_child
+    button: |
+      Child who has the CRA: ${ cra_child }
+  - Edit: factfinding
+    button: |-
+      % if is_child:
+      Has the fact finding hearing happened in your case yet?
+      % else:
+      Has the fact finding hearing happened in ${ cra_child.familiar() }'s case?
+      % endif
+  - Edit: |-
+      ask_filer
+    button: |-
+      Filer : ${ ask_filer }
+  - Edit: |-
+      is_applicant
+    button: |-
+      Your role in the case:
+      
+      * Applicant for the CRA case : ${ word(yesno(is_applicant)) }
+      * ${ cra_child.familiar() } : ${ word(yesno(is_child)) }
+      * Custodian of ${ cra_child.familiar() } : ${ word(yesno(is_legal_custodian)) }
+      * Parent or Legal Guardian of ${ cra_child.familiar() } : ${ word(yesno(is_parent_guardian)) }
+  - Edit: |-
+      application_date
+    button: |-
+      Application date : ${ application_date }
+  - Edit: |-
+      users[0].title
+    button: |-
+      Title : ${ users[0].title }
+  - Edit: |-
+      parentreason
+    button: |-
+      Why was the CRA filed?
+       : ${ parentreason }
+  - Edit: |-
+      schoolreason
+    button: |-
+      Why was the CRA filed?
+       : ${ schoolreason }
+  - Edit: |-
+      users[0].request1
+    button: |-
+      Why was the CRA was filed? : ${ users[0].request1 }
+  - Edit: |-
+      users[0].request2
+    button: |-
+      How have the issues been resolved? : ${ users[0].request2 }  
+---
 objects:
-  - CRA_Motion_to_Dismiss_attachment: ALDocument.using(filename="CRA_Motion_to_Dismiss", title="Motion to Dismiss CRA", enabled=True, has_addendum=True)  
+  - CRA_Motion_to_Dismiss_attachment: ALDocument.using(filename="CRA_Motion_to_Dismiss", title="Motion to Dismiss CRA", enabled=True, has_addendum=True, default_overflow_message="[See addendum]")  
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[CRA_Motion_to_Dismiss_attachment], title="Forms to download and deliver to court", filename="motion_to_dismiss_CRA.pdf")
@@ -426,7 +500,7 @@ attachment:
   docx template file: docx_addendum.docx
 ---
 code: |
-  CRA_Motion_to_Dismiss_attachment.overflow_fields['reasons_for_request'].overflow_trigger = 480
+  CRA_Motion_to_Dismiss_attachment.overflow_fields['reasons_for_request'].overflow_trigger = 640
   CRA_Motion_to_Dismiss_attachment.overflow_fields.gathered = True
 ---
 attachment:
@@ -441,17 +515,15 @@ attachment:
       - "user_signature": ${ users[0].signature_if_final(i) }
       - "signature_date": ${ signature_date }
       - "user_name": ${ str(users[0]) }
-      - "case_name": ${ case_name }
+      - "case_name": ${ cra_child.name.full() }
       - "application_date": ${ application_date }
       - "is_applicant": ${ is_applicant }
       - "is_child": ${ is_child }
       - "is_legal_guardian": ${ is_legal_guardian }
       - "factfinding_hearing_has_occurred": ${ factfinding_hearing_has_occurred }
       - "has_not_occurred": ${ has_not_occurred }
-      - "reasons_for_request": ${ reasons_for_request }
+      - "reasons_for_request": ${ CRA_Motion_to_Dismiss_attachment.safe_value('reasons_for_request') }
       - "user_title": ${ users[0].title }
-      - "service_date": ${ service_date }
-      - "user_signature_2": ${ users[0].signature if service else "" }
 ---
 comment: |
   This question is used to introduce your interview. Please customize
@@ -505,9 +577,16 @@ code: |
 id: Form Preview
 continue button field: CRA_Motion_to_Dismiss_preview_question
 question: |
-  Preview of Completed Motion to Dismiss CRA
+  Preview your motion before you sign it
 subquestion: |
-  Here is a preview of the form to sign on the next page. 
+  Below is a preview of your Motion to Dismiss CRA. Click the
+  image to open in a new window. Click "make changes" to make any 
+  corrections that you need.
   
-   ${CRA_Motion_to_Dismiss_attachment.as_pdf(key='preview')}
+  Do not forget to come back to this screen to continue and add your
+  signature.
+  
+  ${CRA_Motion_to_Dismiss_attachment.as_pdf(key='preview')}
+   
+  ${ action_button_html(url_action('review_all_sections'), label='Make changes', color='info', icon='pencil-alt') }
    
