@@ -29,6 +29,12 @@ code: |
     'typical role': 'unknown',
   })
 ---
+metadata:
+  title: |
+    Dismiss your CRA case
+  short title: |
+    Dismiss CRA
+---
 code: |
   interview_short_title = "Ask the court to dismiss a Child Requiring Assistance case"
 ---
