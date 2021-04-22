@@ -45,7 +45,6 @@ sections:
   - review_cra_motion_to_dismiss: Review your answers
 ---
 objects:
-  - cra_child: ALIndividual
   - users: ALPeopleList.using(ask_number=True, target_number=1)
   - other_parties: ALPeopleList.using(there_are_any=False)
   - defendants: ALPeopleList.using(ask_number=True, target_number=1)
@@ -68,7 +67,7 @@ code: |
   # Set the preferred/allowed courts for this interview
   preferred_court = interview_metadata["CRA_Motion_to_Dismiss"]["preferred court"]
   allowed_courts = interview_metadata["CRA_Motion_to_Dismiss"]["allowed courts"]
-  cra_child.name.first
+  defendants[0].name.first
   nav.set_section('review_cra_motion_to_dismiss')
   if not(is_applicant or is_legal_guardian or is_child):
     exit_must_be_interested_party
@@ -90,11 +89,13 @@ code: |
 depends on:
   - is_child
 code: |
-  users[0] = cra_child.copy_shallow('users[0]')
+  users.clear()
+  new_user = users.appendObject()
+  new_user.name.first = defendants[0].name.first
+  new_user.name.middle = defendants[0].name.middle
+  new_user.name.last = defendants[0].name.last
+  new_user.name.suffix = defendants[0].name.suffix
   set_user_to_child = True
----
-code: |
-  cra_child = defendants[0]
 ---
 id: Fact-Finding Hearing
 question: |
@@ -192,7 +193,7 @@ fields:
       % if is_child:
       Has the fact finding hearing happened in your case yet?
       % else:
-      Has the fact finding hearing happened in ${ cra_child.familiar() }'s case?
+      Has the fact finding hearing happened in ${ defendants[0].familiar() }'s case?
       % endif
     field: factfinding
     datatype: radio
@@ -248,7 +249,7 @@ question: |
   % if is_child:
   Who filed the CRA case against you?
   % else:
-  Who filed the CRA case against ${ cra_child.familiar() }?
+  Who filed the CRA case against ${ defendants[0].familiar() }?
   % endif
 fields:
   - Filer: ask_filer
@@ -290,20 +291,20 @@ subquestion: |
   You need to be part of the CRA case to ask the court to dismiss it.
 
   Select all that apply. You may be both the applicant and 
-  ${ cra_child.familiar() }'s parent or guardian, for example.
+  ${ defendants[0].familiar() }'s parent or guardian, for example.
 fields:
   - Applicant for the CRA case: is_applicant
     datatype: yesno
     help: |
       The person who asked the court for the CRA against
-      ${ cra_child.familiar() }.
-  - ${ cra_child.familiar() }: is_child
+      ${ defendants[0].familiar() }.
+  - ${ defendants[0].familiar() }: is_child
     datatype: yesno
     help: |
       The child who got the CRA case you want to dismiss.
-  - Custodian of ${ cra_child.familiar() }: is_legal_custodian
+  - Custodian of ${ defendants[0].familiar() }: is_legal_custodian
     datatype: yesno
-  - Parent or Legal Guardian of ${ cra_child.familiar() }: is_parent_guardian
+  - Parent or Legal Guardian of ${ defendants[0].familiar() }: is_parent_guardian
     datatype: yesno    
 validation code: |
   if (is_child and is_applicant):
@@ -423,7 +424,7 @@ subquestion: |
      to deliver these forms. You can mail a copy to 
      ${ trial_court.address.on_one_line() }.
   
-  ${ action_button_html(url_action('review_all_sections'), label='Make changes', color='info', icon='pencil-alt') }
+  ${ action_button_html(url_action('review_cra_motion_to_dismiss'), label='Make changes', color='info', icon='pencil-alt') }
   
   ${al_user_bundle.download_list_html() }
   
@@ -437,15 +438,15 @@ review:
   - Edit: users[0].name.first
     button: |
       Your name: ${ users }
-  - Edit: cra_child
+  - Edit: defendants[0]
     button: |
-      Child who has the CRA: ${ cra_child }
+      Child who has the CRA: ${ defendants[0] }
   - Edit: factfinding
     button: |-
       % if is_child:
       Has the fact finding hearing happened in your case yet?
       % else:
-      Has the fact finding hearing happened in ${ cra_child.familiar() }'s case?
+      Has the fact finding hearing happened in ${ defendants[0].familiar() }'s case?
       % endif
   - Edit: |-
       ask_filer
@@ -457,9 +458,9 @@ review:
       Your role in the case:
       
       * Applicant for the CRA case : ${ word(yesno(is_applicant)) }
-      * ${ cra_child.familiar() } : ${ word(yesno(is_child)) }
-      * Custodian of ${ cra_child.familiar() } : ${ word(yesno(is_legal_custodian)) }
-      * Parent or Legal Guardian of ${ cra_child.familiar() } : ${ word(yesno(is_parent_guardian)) }
+      * ${ defendants[0].familiar() } : ${ word(yesno(is_child)) }
+      * Custodian of ${ defendants[0].familiar() } : ${ word(yesno(is_legal_custodian)) }
+      * Parent or Legal Guardian of ${ defendants[0].familiar() } : ${ word(yesno(is_parent_guardian)) }
   - Edit: |-
       application_date
     button: |-
@@ -515,7 +516,7 @@ attachment:
       - "user_signature": ${ users[0].signature_if_final(i) }
       - "signature_date": ${ signature_date }
       - "user_name": ${ str(users[0]) }
-      - "case_name": ${ cra_child.name.full() }
+      - "case_name": ${ defendants[0].name.full() }
       - "application_date": ${ application_date }
       - "is_applicant": ${ is_applicant }
       - "is_child": ${ is_child }
@@ -572,7 +573,7 @@ depends on:
   - users[0].request2
 code: |
   # set_users_request = True must be the very last line of this code block. 
-  reasons_for_request = users[0].request1 + users[0].request2
+  reasons_for_request = fix_punctuation(users[0].request1) + '\n' + fix_punctuation(users[0].request2)
 ---
 id: Form Preview
 continue button field: CRA_Motion_to_Dismiss_preview_question
@@ -588,5 +589,5 @@ subquestion: |
   
   ${CRA_Motion_to_Dismiss_attachment.as_pdf(key='preview')}
    
-  ${ action_button_html(url_action('review_all_sections'), label='Make changes', color='info', icon='pencil-alt') }
+  ${ action_button_html(url_action('review_cra_motion_to_dismiss'), label='Make changes', color='info', icon='pencil-alt') }
    
