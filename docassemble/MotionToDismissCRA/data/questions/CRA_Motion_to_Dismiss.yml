@@ -444,7 +444,7 @@ review:
   - Edit: users[0].name.first
     button: |
       Your name: ${ users }
-  - Edit: defendants[0]
+  - Edit: defendants[0].name.first
     button: |
       Child who has the CRA: ${ defendants[0] }
   - Edit: factfinding

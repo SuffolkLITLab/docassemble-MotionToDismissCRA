@@ -1,6 +1,6 @@
 # docassemble.MotionToDismissCRA
 
-A docassemble extension.
+This form asks the court to dismiss an Application for Child Requiring Assistance.
 
 ## Author
 
