@@ -6,6 +6,7 @@ from distutils.util import convert_path
 
 standard_exclude = ('*.pyc', '*~', '.*', '*.bak', '*.swp*')
 standard_exclude_directories = ('.*', 'CVS', '_darcs', './build', './dist', 'EGG-INFO', '*.egg-info')
+
 def find_package_data(where='.', package='', exclude=standard_exclude, exclude_directories=standard_exclude_directories):
     out = {}
     stack = [(convert_path(where), '', package)]
@@ -45,7 +46,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
 setup(name='docassemble.MotionToDismissCRA',
       version='0.0.4',
       description=('Motion to dismiss Child Requiring Assistance Case'),
-      long_description='# docassemble.MotionToDismissCRA\r\n\r\nThis form asks the court to dismiss an Application for Child Requiring Assistance.\r\n\r\n## Author\r\n\r\nCaroline Robinson, crobinson@mlri.org\r\n\r\n',
+      long_description='# Massachusetts Motion to Dismiss CRA (JV-091)\r\n\r\nThis is a Docassemble interview to complete the Massachusetts Motion to Dismiss CRA (JV-091) form. The live interview can be found at [courtformsonline.org/safety/#mtdCRA](https://courtformsonline.org/safety/#mtdCRA).\r\n\r\n## Author\r\n\r\nCaroline Robinson\r\n',
       long_description_content_type='text/markdown',
       author='Caroline Robinson',
       author_email='crobinson@mlri.org',
