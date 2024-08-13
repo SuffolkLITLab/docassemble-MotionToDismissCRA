@@ -55,9 +55,11 @@ metadata:
   help_page_url: https://www.mass.gov/info-details/learn-about-your-rights-in-a-child-requiring-assistance-case
   help_page_title: Learn about your rights in a Child Requiring Assistance Case
   LIST_topics: 
-    - FA-07-00-00-00
+    - FA-00-00-00-00
+    - CR-10-00-00-00
   tags: 
-    - FA-07-00-00-00
+    - FA-00-00-00-00
+    - CR-10-00-00-00
   jurisdiction: NAM-US-US+MA
   original_form: https://www.mass.gov/doc/cra-motion-to-dismiss-jv-091/download
   original_form_published_on: 2012-11-05
