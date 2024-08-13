@@ -35,26 +35,25 @@ metadata:
   short title: |
     Dismiss CRA
   description: |
-    If you have a Child Requiring Assistance (CRA) case, you can use this form to ask the court 
-    to dismiss it. You can use this form if you are the child, the child's parent or legal guardian, 
-    the child's custodian, or the person who asked for the CRA.
+    If the court has created a Child Requiring Assistance (CRA) case against a child, you can use this form to ask the court to dismiss it.
   can_I_use_this_form: |
     You can use this interview if you are:
 
-    * The child,
-    * The child's parent or legal guardian,
-    * The child's custodian, or
-    * The person who asked for the CRA.
+    * the child,
+    * the child's parent or legal guardian,
+    * the child's custodian, or
+    * the person who asked for the CRA.
   before_you_start: |
-    Before you start, you need to know the date that the application for a CRA case was filed and 
-    the case number for the CRA case.
+    Before you start, you need to know:
+    * the date that the application for a CRA case was filed, and 
+    * the case number for the CRA case. This is also called a docket number.
   maturity: production
   estimated_completion_minutes: 15
   estimated_completion_delta: 3
   languages:
     - en
-  help_page_url: "https://www.mass.gov/info-details/learn-about-your-rights-in-a-child-requiring-assistance-case"
-  help_page_title: "Learn about your rights in a Child Requiring Assistance Case"
+  help_page_url: https://www.mass.gov/info-details/learn-about-your-rights-in-a-child-requiring-assistance-case
+  help_page_title: Learn about your rights in a Child Requiring Assistance Case
   LIST_topics: 
     - FA-00-00-00-00
     - CR-10-00-00-00
@@ -62,11 +61,11 @@ metadata:
     - FA-00-00-00-00
     - CR-10-00-00-00
   jurisdiction: NAM-US-US+MA
-  original_form: "https://www.mass.gov/doc/cra-motion-to-dismiss-jv-091/download"
+  original_form: https://www.mass.gov/doc/cra-motion-to-dismiss-jv-091/download
   original_form_published_on: 2012-11-05
-  review_date: 2024-04-27
+  review_date: August 2024
   form_titles:
-    - Motion to Dismiss Application for Assistance
+    - Motion to Dismiss Application for Child Requiring Assistance
   form_numbers:
     - JV-091 (11/05/2012)
   fees:
