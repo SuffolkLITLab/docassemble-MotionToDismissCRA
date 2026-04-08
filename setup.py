@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.MotionToDismissCRA',
-      version='0.0.4',
+      version='0.2.0',
       description=('Motion to dismiss Child Requiring Assistance Case'),
       long_description='# Massachusetts Motion to Dismiss CRA (JV-091)\r\n\r\nThis is a Docassemble interview to complete the Massachusetts Motion to Dismiss CRA (JV-091) form. The live interview can be found at [courtformsonline.org/safety/#mtdCRA](https://courtformsonline.org/safety/#mtdCRA).\r\n\r\n## Author\r\n\r\nCaroline Robinson\r\n',
       long_description_content_type='text/markdown',
