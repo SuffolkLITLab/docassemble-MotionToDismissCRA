@@ -227,7 +227,7 @@ subquestion: |
     </div>
   </li>
   </ul>
-  <a href="https://www.mass.gov/info-details/learn-about-the-child-requiring-assistance-case-process">Read more</a>. 
+  <a href="https://www.mass.gov/info-details/learn-about-the-child-requiring-assistance-case-process">Read more about the Child Requiring Assistance case process</a>. 
   </div>
   </div>  
   
@@ -391,7 +391,7 @@ subquestion: |
 
   You said you are not any of those. You cannot use this form.
   
-  [Learn more](https://www.mass.gov/child-requiring-assistance-cases).
+  [Learn more about Child Requiring Assistance cases](https://www.mass.gov/child-requiring-assistance-cases).
 ---
 #code: |
  #is_applicant = relationship == "applicant"
@@ -441,7 +441,7 @@ question: |
 subquestion: |
   In the original CRA, the filer either claimed the child was a **Habitual Truant** or a **Habitual School Offender**. The definitions for each are below.  
 
-  * **Habitual Truant**: a child who fails to attend school for more than 8 days in a quarterwithout a proper excuse.
+  * **Habitual Truant**: a child who fails to attend school for more than 8 days in a quarter without a proper excuse.
       
   * **Habitual School Offender**: a child who fails to obey the lawful and reasonable commands of the school.
   
@@ -602,7 +602,7 @@ question: |
 subquestion: |
   Some of the **common reasons to dismiss** are: the issue that brought the petition before the court has been resolved; a parent no longer wants the case to be in court; or, the family has not been provided services to their satisfaction.
   
-  For more information about the CRA process, [click here](https://www.mass.gov/doc/handbook-for-parents-legal-guardians-and-custodians-in-child-requiring-assistance-cases-0/download). 
+  [Click here for more information about the CRA process](https://www.mass.gov/doc/handbook-for-parents-legal-guardians-and-custodians-in-child-requiring-assistance-cases-0/download). 
 fields:
   - Why was the CRA was filed?: users[0].request1
     input type: area
